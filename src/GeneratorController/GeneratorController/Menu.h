@@ -51,9 +51,7 @@ void Menu_Reset(Menu * menu, MenuStatus ms);
 void Menu_Loop(Menu * menu);
 
 void Menu_ShowReset(Menu * menu);
-void Menu_ShowTerm(Menu * menu);
 void Menu_ShowSettings(Menu * menu);
-void Menu_ShowRelayMenu(Menu * menu);
 
 void Menu_BtnMinusPressed(Menu * menu);
 void Menu_BtnPlusPressed(Menu * menu);

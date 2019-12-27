@@ -36,6 +36,7 @@ SUBDIRS :=
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS +=  \
 ../GeneratorController.c \
+../io_ports.c \
 ../lcd.c \
 ../Menu.c \
 ../settings.c
@@ -49,6 +50,7 @@ ASM_SRCS +=
 
 OBJS +=  \
 GeneratorController.o \
+io_ports.o \
 lcd.o \
 Menu.o \
 settings.o
@@ -56,6 +58,7 @@ settings.o
 
 OBJS_AS_ARGS +=  \
 GeneratorController.o \
+io_ports.o \
 lcd.o \
 Menu.o \
 settings.o
@@ -63,6 +66,7 @@ settings.o
 
 C_DEPS +=  \
 GeneratorController.d \
+io_ports.d \
 lcd.d \
 Menu.d \
 settings.d
@@ -70,6 +74,7 @@ settings.d
 
 C_DEPS_AS_ARGS +=  \
 GeneratorController.d \
+io_ports.d \
 lcd.d \
 Menu.d \
 settings.d
@@ -84,6 +89,8 @@ ADDITIONAL_DEPENDENCIES:=
 OUTPUT_FILE_DEP:= ./makedep.mk
 
 # AVR32/GNU C Compiler
+
+
 
 
 

@@ -62,6 +62,12 @@
     <Compile Include="GeneratorController.c">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="io_ports.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="io_ports.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="lcd.c">
       <SubType>compile</SubType>
     </Compile>

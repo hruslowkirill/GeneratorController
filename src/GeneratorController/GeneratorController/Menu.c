@@ -9,15 +9,11 @@
 
 uint8_t NUMBER_OF_SETTINGS(uint8_t RELAY)
 {
-	if (RELAY==PWM_RELAY)
-		return 11;
 	return 7;		
 }
 
 uint8_t NUMBER_OF_TERMS(uint8_t RELAY)
 {
-	if (RELAY==PWM_RELAY)
-		return 2;
 	return 3;		
 }
 
@@ -83,69 +79,7 @@ void Menu_ShowReset(Menu * menu)
 
 }
 
-void Menu_ShowTerm(Menu * menu)
-{
-	LCD_2buffer_begin();
-	LCD_2buffer_Move_Cursor(1);
-	LCD_2buffer_printStr("Temp1");
 
-	
-	
-	if (menu->current_relay!=PWM_RELAY)
-	{
-		LCD_2buffer_Move_Cursor(9);
-		LCD_2buffer_printStr("Temp2");
-		
-		LCD_2buffer_Move_Cursor(17);
-		LCD_2buffer_printStr("Temp3");
-	}
-	switch(	menu->sub_current_status)
-	{
-		case 0:
-			LCD_2buffer_Move_Cursor(0);
-		break;
-
-		case 1:
-			LCD_2buffer_Move_Cursor(8);
-		break;
-
-		case 2:
-			LCD_2buffer_Move_Cursor(16);
-		break;
-	}
-	LCD_2buffer_printStr(">");
-	/*
-	if (menu->current_relay==PWM_RELAY)
-	{
-		if (menu->allSettings->PWMSettings[0].on)
-		{
-			LCD_2buffer_Move_Cursor(6);		
-			LCD_2buffer_printStr("*");
-		}		
-	}else
-	{
-		if (menu->allSettings->settings[menu->current_relay][0].on)
-		{
-			LCD_2buffer_Move_Cursor(6);		
-			LCD_2buffer_printStr("*");
-		}
-		if (menu->allSettings->settings[menu->current_relay][1].on)
-		{
-			LCD_2buffer_Move_Cursor(14);		
-			LCD_2buffer_printStr("*");
-		}
-		if (menu->allSettings->settings[menu->current_relay][2].on)
-		{
-			LCD_2buffer_Move_Cursor(22);		
-			LCD_2buffer_printStr("*");
-		}
-	}	
-	*/
-	LCD_2buffer_end();
-	//LCD_Clear_Display();
-	//LCD_printStr("HELLO");
-	//_delay_ms(1);
-}
 
 void Menu_ShowSettings(Menu * menu)
 {
@@ -218,48 +152,6 @@ void Menu_ShowSettings(Menu * menu)
 
 
 
-void Menu_ShowRelayMenu(Menu * menu)
-{
-
-	LCD_2buffer_begin();
-	LCD_2buffer_Move_Cursor(1);
-	LCD_2buffer_printStr("Relay1");
-
-	LCD_2buffer_Move_Cursor(9);
-	LCD_2buffer_printStr("Relay2");
-
-	LCD_2buffer_Move_Cursor(17);
-	LCD_2buffer_printStr("Relay3");
-	
-	LCD_2buffer_Move_Cursor(25);
-	LCD_2buffer_printStr("Relay4");
-
-	switch(	menu->sub_current_status)
-	{
-		case 0:
-			LCD_2buffer_Move_Cursor(0);
-		break;
-
-		case 1:
-			LCD_2buffer_Move_Cursor(8);
-		break;
-
-		case 2:
-			LCD_2buffer_Move_Cursor(16);
-		break;
-		
-		case 3:
-			LCD_2buffer_Move_Cursor(24);
-		break;
-	}
-	
-	LCD_2buffer_printStr(">");
-
-	LCD_2buffer_end();
-	//LCD_Clear_Display();
-	//LCD_printStr("HELLO");
-	//_delay_ms(1);
-}
 
 void Menu_BtnMinusPressed(Menu * menu)
 {
@@ -321,7 +213,7 @@ void Menu_BtnOKPressed(Menu * menu)
 		
 		case MS_RESET:
 			Settings_Reset(menu->allSettings);
-			//Menu_Reset(menu, MS_RELAY);
+			Menu_Reset(menu, MS_DEFAULT);
 		break;
 		
 

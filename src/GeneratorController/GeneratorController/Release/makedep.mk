@@ -4,6 +4,8 @@
 
 GeneratorController.c
 
+io_ports.c
+
 lcd.c
 
 Menu.c

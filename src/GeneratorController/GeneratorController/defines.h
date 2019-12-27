@@ -9,20 +9,13 @@
 
 #define byte unsigned char
 
-#define RELAY_DDR DDRB
-#define RELAY_PORT PORTB
-#define RELAY_PIN PINB
-#define RELAY1 0
-#define RELAY2 1
-#define RELAY3 2
-#define RELAY4 3
-
-#define PWM_RELAY RELAY4
-
-#define OVERFLOW_SIGNAL 5
 
 
 #define Off(PORT, N) PORT &= ~(1<<N)
 #define On(PORT, N) PORT |= 1<<N
+
+#define isOn(PIN, N) (PIN>>N)&1
+
+#define delay_sec(S) for (byte i=0; i<S; i++) _delay_ms(1000)
 
 #endif

@@ -9,6 +9,7 @@
 #include "defines.h"
 #include "lcd.h"
 #include "menu.h"
+#include "io_ports.h"
 
 #define BTNDDR DDRC
 #define BTNPORT PORTC
@@ -21,14 +22,25 @@
 
 #define BTN_long_time 1000
 
-#define LED_OFF_TIME 10000
-
 typedef enum {PS_WORK, PS_MENU} ProgramState;
+	
+/*
+WS_INIT - Initialize ports
+WS_NETCHECK - CHECK IS NETWORK IS ON
+WS_GEN_COOLDOWN - 
+WS_NET_WAIT - 
+WS_GEN_START - 
+*/
+typedef enum { WS_INIT, WS_NETCHECK, WS_GEN_COOLDOWN, WS_NET_WAIT, WS_GEN_START, WS_GEN_SWITCH } WorkState;
+	
+
 
 AllSettings allSettings;
 ProgramState ps;
+WorkState ws;
 Menu menu;
 uint32_t iterations = 0;
+byte fault;
 
 void ShowMenu(MenuStatus ms);
 void HideMenu();
@@ -47,12 +59,28 @@ int32_t BTN3_status;
 
 int main(void)
 {
-	DDRB = 0xFF;
+	DDRB = 0x00;
 	LCD_Init();
 	BTN_Init();
 	Menu_Init(&menu, &allSettings);
+	Settings_Init(&allSettings);
+	io_init();
+	
+	ws = WS_INIT;
 	
 	ledON;
+	
+	/*
+	while(1)
+	{
+		outOn(P1);
+		delay_sec(5);
+		outOff(P1);	
+		delay_sec(5);	
+	}
+	return 0;*/
+	
+	
     while(1)
     {
 		BTN_Process();
@@ -92,17 +120,190 @@ void HideMenu()
 	sei();
 }
 
+void printStatus(WorkState ws)
+{
+	switch (ws)
+	{
+		case WS_INIT:
+			LCD_2buffer_printStr("WS_INIT");
+		break;
+		
+		case WS_NETCHECK:
+			LCD_2buffer_printStr("WS_NETCHECK");
+		break;
+		
+		case WS_GEN_COOLDOWN:
+			LCD_2buffer_printStr("WS_GEN_COOLDOWN");
+		break;
+		
+		case WS_NET_WAIT:
+			LCD_2buffer_printStr("WS_NET_WAIT");
+		break;
+		
+		case WS_GEN_START:
+			LCD_2buffer_printStr("WS_GEN_START");
+		break;
+		
+		case WS_GEN_SWITCH:
+			LCD_2buffer_printStr("WS_GEN_SWITCH");
+		break;
+	}		
+}
+
 void DoWork()
 {
-	if (iterations%500!=0)
+	byte t;
+	byte x;
+	if (iterations%100!=0)
 		{
 			iterations++;
 			//_delay_ms(1);
 			return;
 		}
 		
+		
+	switch (ws)
+	{
+		case WS_INIT:
+			fault = 0;
+			io_init();
+			ws = WS_NETCHECK;
+		break;
+		
+		case WS_NETCHECK:
+			if (isNet())
+			{
+				outOff(P2);	
+				delay_sec(allSettings.mainSettings.t0);
+				outOn(P1);	
+				if (isP(P3))
+				{
+					ws = WS_GEN_COOLDOWN;				
+				}else
+				{
+					ws = WS_NETCHECK;
+				}			
+			}else
+			{
+				ws = WS_NET_WAIT;			
+			}
+		break;
+		
+		case WS_GEN_COOLDOWN:
+			for (t=0; t<allSettings.mainSettings.tstop; t++)
+			{
+				delay_sec(1);
+				if (isNet()==0)
+				{
+					//outOff(P3);
+					break;
+				}				
+			}
+			if (isNet())
+			{
+				outOff(P3);					
+			}
+			ws = WS_NETCHECK;
+		break;
+		
+		case WS_NET_WAIT:
+			if (fault)
+			{
+				ws = WS_NETCHECK;				
+			}else
+			{
+				if (isGen())
+				{
+					ws = WS_GEN_SWITCH;				
+				}else
+				{
+					for (t=0; t<allSettings.mainSettings.t33; t++)
+					{
+						delay_sec(1);
+						if (isNet())	
+						{
+							break;
+						}			
+					}
+					if (isNet())
+					{
+						ws = WS_NETCHECK;						
+					}else
+					{
+						ws = WS_GEN_START;
+					}
+				}
+			}
+		break;
+		
+		case WS_GEN_START:
+			outOn(P3);
+			for (x=0; x<allSettings.mainSettings.k; x++)
+			{
+				delay_sec(allSettings.mainSettings.t0);
+				outOn(P5);
+				delay_sec(allSettings.mainSettings.t0);
+				outOff(P5);		
+				outOn(P4);	
+				delay_sec(allSettings.mainSettings.t3+x);	
+				outOff(P4);	
+				delay_sec(allSettings.mainSettings.t0);
+				outOn(P6);
+				delay_sec(allSettings.mainSettings.t0);
+				outOff(P6);
+				delay_sec(allSettings.mainSettings.tn);
+				if (isGen())
+				{
+					break;					
+				}
+			}
+			if (isGen())
+			{
+				delay_sec(allSettings.mainSettings.tp);
+				if (isNet())
+				{
+					ws = WS_NETCHECK;						
+				}else
+				{
+					ws = WS_GEN_SWITCH;	
+				}
+			}else
+			{
+				fault = 1;
+				ws = WS_NETCHECK;
+			}
+		break;
+		
+		case WS_GEN_SWITCH:
+			outOff(P1);
+			delay_sec(allSettings.mainSettings.t0);
+			outOn(P2);
+			ws = WS_NETCHECK;
+		break;
+		
+	
+	}
+		
 	LCD_2buffer_begin();
-	LCD_2buffer_printStr("Hello");
+	printStatus(ws);
+	LCD_2buffer_Move_Cursor(16);
+	if (fault)
+	{
+		LCD_2buffer_printStr("FAULT");
+	}	
+	
+	LCD_2buffer_Move_Cursor(22);
+	if (isP(P1))
+	{
+		LCD_2buffer_printStr("NET");
+	}	
+	
+
+	LCD_2buffer_Move_Cursor(26);
+	if (isP(P2))
+	{
+		LCD_2buffer_printStr("GEN");	
+	}
 	LCD_2buffer_end();
 	iterations = 1;
 	_delay_us(100);
